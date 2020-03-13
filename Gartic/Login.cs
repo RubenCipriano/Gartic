@@ -80,8 +80,8 @@ namespace Gartic
             Formm.clientSocket = clientSocket;
             Formm.strName = strName;
             Formm.epServer = epServer;
-            Formm.ShowDialog();
-            //Close();
+            //Formm.ShowDialog();
+            Close();
         }
        
         /* private void OnSend(IAsyncResult ar)

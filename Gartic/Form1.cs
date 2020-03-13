@@ -66,7 +66,7 @@ namespace Gartic
                         progressBar1.Value = Convert.ToInt32(msgReceived.strMessage);
                         break;
                     case Command.Paint:
-
+                        break;
                 }
                 
             }
@@ -109,14 +109,6 @@ namespace Gartic
                 g.DrawLine(pen, new Point(x, y), e.Location);
                 x = e.X;
                 y = e.Y;
-
-                msgReceived = new Data();
-                msgReceived.strName = x + "*" + y;
-                msgReceived.strMessage = pen.Color.ToString();
-                msgReceived.cmdCommand = Command.Null;
-                byte[] byteData = msgReceived.ToByte();
-
-                clientSocket.BeginSendTo(byteData, 0, byteData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
             }
         }
 
