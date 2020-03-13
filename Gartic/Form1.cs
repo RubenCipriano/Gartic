@@ -65,9 +65,8 @@ namespace Gartic
                     case Command.Prog:
                         progressBar1.Value = Convert.ToInt32(msgReceived.strMessage);
                         break;
-                    //case Command.Paint:
-                    
-
+                    case Command.Paint:
+                        break;
                 }
                 
             }
@@ -109,7 +108,7 @@ namespace Gartic
             {
                 g.DrawLine(pen, new Point(x, y), e.Location);
                 x = e.X;
-                y = e.Y;             
+                y = e.Y;
             }
         }
 
