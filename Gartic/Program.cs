@@ -25,7 +25,6 @@ namespace Gartic
                Formm.clientSocket = login.clientSocket;
                 Formm.strName = login.strName;
                 Formm.epServer = login.epServer;
-
                 Formm.ShowDialog();
             }
 

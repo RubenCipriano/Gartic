@@ -19,11 +19,13 @@ namespace Gartic
         public Socket clientSocket; //Socket do cliente
         public string strName;      //Nome do utilizador no chat
         public EndPoint epServer;   //IP do servidor
+        public bool joga;
         int OLA = 1;
         Graphics g;
         int x = -1;
         int y = -1;
         Pen pen;
+        Data msgReceived;
         bool moving= false;
         string acertou = null;
         public Form1()
@@ -35,29 +37,42 @@ namespace Gartic
             pen.StartCap = pen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
         }
         string palavra;
+        
+
         private void Form1_Load(object sender, EventArgs e)
         {
+
             progressBar1.Value = 100;
             lsbUsers.Items.Add(strName);
-            lsbUsers.Items.Add("Pontos: "+pontos);
-
+            lsbUsers.Items.Add("Pontos: " + pontos);
+            palavra = "banana";
             clientSocket.BeginReceiveFrom(byteData, 0, byteData.Length, SocketFlags.None, ref epServer, new AsyncCallback(onReceive), epServer);
-             palavra = "banana";
         }
         private void onReceive(IAsyncResult ar)
         {
             try
             {
-                Data msgReceived = new Data(byteData);
-                if (msgReceived.strMessage != "Joga")
+                clientSocket.EndReceiveFrom(ar, ref epServer);
+                msgReceived = new Data(byteData);
+                switch(msgReceived.cmdCommand)
                 {
-                    pnDesenhar.Enabled = false;
+                    case Command.Null:
+                        if (msgReceived.strMessage == "Joga" && msgReceived.strName == strName)
+                            pnDesenhar.Enabled = true;
+                        else
+                            pnDesenhar.Enabled = false;
+                        break;
+                    case Command.Prog:
+                        progressBar1.Value = Convert.ToInt32(msgReceived.strMessage);
+                        break;
+                    case Command.Paint:
+
                 }
+                
             }
             catch
             { }
         }
-
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
 
@@ -75,6 +90,7 @@ namespace Gartic
             x= e.X;
             y = e.Y;
             pnDesenhar.Cursor = Cursors.Cross;
+
         }
 
         private void panel1_MouseUp(object sender, MouseEventArgs e)
@@ -93,6 +109,14 @@ namespace Gartic
                 g.DrawLine(pen, new Point(x, y), e.Location);
                 x = e.X;
                 y = e.Y;
+
+                msgReceived = new Data();
+                msgReceived.strName = x + "*" + y;
+                msgReceived.strMessage = pen.Color.ToString();
+                msgReceived.cmdCommand = Command.Null;
+                byte[] byteData = msgReceived.ToByte();
+
+                clientSocket.BeginSendTo(byteData, 0, byteData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
             }
         }
 
@@ -139,7 +163,7 @@ namespace Gartic
             string mensagem = null;
             if (txtEnviar.Text == "")
                 return;
-            mensagem= strName+" : " + txtEnviar.Text;
+            mensagem = strName + " : " + txtEnviar.Text;
             lsbConversa.Items.Add(mensagem);
 
 
@@ -147,24 +171,25 @@ namespace Gartic
             {
                 pontos++;
                 palavra = "Ruben";
-            
-                for (int idx = 0; idx < lsbUsers.Items.Count-1; idx++)
+
+                for (int idx = 0; idx < lsbUsers.Items.Count - 1; idx++)
                 {
                     if (lsbUsers.Items[idx] == strName)
                     {
                         lsbUsers.Items[idx + 1] = "Pontos: " + pontos;
-                        
+
                     }
                 }
             }
-                   
+
+
             try
             {
-                Data msgtosend = new Data();
-                msgtosend.strName = "eeuterio";
-                msgtosend.strMessage = txtEnviar.Text;
-                msgtosend.cmdCommand = Command.Message;
-                byte[] byteData = msgtosend.ToByte();
+                msgReceived = new Data();
+                msgReceived.strName = strName;
+                msgReceived.strMessage = txtEnviar.Text;
+                msgReceived.cmdCommand = Command.Message;
+                byte[] byteData = msgReceived.ToByte();
 
                 clientSocket.BeginSendTo(byteData, 0, byteData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
             }
@@ -190,10 +215,18 @@ namespace Gartic
         
         private void timer1_Tick(object sender, EventArgs e)
         {
-           if(progressBar1.Value > 0)
-            {
-                progressBar1.Value -= 5;
-            }
+            clientSocket.BeginReceiveFrom(byteData, 0, byteData.Length, SocketFlags.None, ref epServer, new AsyncCallback(onReceive), null);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            msgReceived = new Data();
+            msgReceived.strName = strName;
+            msgReceived.strMessage = txtEnviar.Text;
+            msgReceived.cmdCommand = Command.Logout;
+            byte[] byteData = msgReceived.ToByte();
+
+            clientSocket.BeginSendTo(byteData, 0, byteData.Length, SocketFlags.None, epServer, new AsyncCallback(OnSend), null);
         }
     }
    

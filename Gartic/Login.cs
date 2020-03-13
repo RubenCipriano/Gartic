@@ -16,13 +16,18 @@ namespace Gartic
         Logout,     //Saída/desconectar
         Message,    //Envio de mensagem para todos os clientes
         List,       //Obter lista dos utilizadores
-        Null        //auxiliar
+        Null,        //auxiliar
+        Prog,
+        Paint
     }
     public partial class Login : Form
     {
+        byte[] byteData = new byte[1024];
         public Socket clientSocket;
         public EndPoint epServer;
         public string strName;
+        public bool joga;
+        Data msgReceived;
 
         public Login()
         {
@@ -41,7 +46,7 @@ namespace Gartic
                 //Endereço IP do servidor
                 IPAddress ipAddress = IPAddress.Parse(txtServerIP.Text);
                 //Servidor a aguardar comunicação na porta 1100
-                IPEndPoint ipEndPoint = new IPEndPoint(ipAddress, 1200);
+                IPEndPoint ipEndPoint = new IPEndPoint(ipAddress, 1000);
 
                 epServer = (EndPoint)ipEndPoint;
 
@@ -65,7 +70,21 @@ namespace Gartic
             }
         
     }
-            private void OnSend(IAsyncResult ar)
+        
+        private void OnSend(IAsyncResult ar)
+        {
+            clientSocket.EndSend(ar);
+            strName = txtName.Text;
+            DialogResult = DialogResult.OK;
+            Form1 Formm = new Form1();
+            Formm.clientSocket = clientSocket;
+            Formm.strName = strName;
+            Formm.epServer = epServer;
+            Formm.ShowDialog();
+            //Close();
+        }
+       
+        /* private void OnSend(IAsyncResult ar)
         {
             try
             {
@@ -86,7 +105,7 @@ namespace Gartic
             {
                 MessageBox.Show(ex.Message, "Cliente", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
+        } */
     }
     class Data
     {

@@ -201,6 +201,7 @@
             this.Controls.Add(this.pnDesenhar);
             this.Name = "Form1";
             this.Text = "ComicArt";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
             ((System.ComponentModel.ISupportInitialize)(this.pcbVermelho)).EndInit();
